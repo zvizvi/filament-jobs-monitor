@@ -35,6 +35,35 @@ php artisan vendor:publish --tag="filament-jobs-monitor-migrations"
 php artisan migrate
 ```
 
+### Styles
+
+This package's views are styled with Tailwind utility classes. As of v4.5.1 the bundled
+stylesheet is **not** loaded automatically — you choose how those classes get compiled.
+
+**If your panel has a [custom theme](https://filamentphp.com/docs/5.x/styling/overview#creating-a-custom-theme) (recommended)**, add this package to the theme's
+`@source` list so the utilities are built with *your* design tokens:
+
+```css
+/* resources/css/filament/admin/theme.css */
+@source '../../../../vendor/croustibat/filament-jobs-monitor/resources/views/**/*.blade.php';
+@source '../../../../vendor/croustibat/filament-jobs-monitor/src/**/*.php';
+```
+
+**If your panel uses Filament's default stylesheet**, opt into the bundled build instead:
+
+```php
+FilamentJobsMonitorPlugin::make()->withStyles()
+```
+
+> [!WARNING]
+> Earlier versions registered the bundled stylesheet globally from the service provider.
+> Because `FilamentAsset::register()` is not panel-scoped, it loaded on every page of
+> **every** panel — including panels that never register this plugin — and rendered after
+> the panel theme. Its plain utility selectors then overrode the host application's
+> `ring-*`, `gray-*` and `primary-*` classes app-wide (the bundle hard-codes `primary` to
+> amber). `withStyles()` now scopes it to the panel it is registered on, and it is off by
+> default. See [Using Tailwind CSS in plugins](https://filamentphp.com/docs/5.x/advanced/assets#using-tailwind-css-in-plugins).
+
 ## Usage
 
 ### Configuration

@@ -2,6 +2,26 @@
 
 All notable changes to `filament-jobs-monitor` will be documented in this file.
 
+## 4.5.1 - 2026-08-03
+
+### Fixed
+
+- **The bundled stylesheet no longer leaks into the whole application.** It was registered
+  with `FilamentAsset::register()` in `packageBooted()`, which is not panel-scoped — so it
+  loaded on every page of every panel, including panels that never register this plugin, and
+  rendered after the panel theme. Being a plain Tailwind utility dump, its single-class
+  selectors then overrode the host application's `ring-*`, `gray-*` and `primary-*` utilities
+  app-wide (the bundle hard-codes `primary` to amber, and its Tailwind v3 `--tw-ring-*`
+  scheme is incompatible with Tailwind v4 rings).
+
+### Changed
+
+- **BREAKING (styling only):** the bundled stylesheet is now opt-in and panel-scoped via
+  `FilamentJobsMonitorPlugin::make()->withStyles()`. Panels with a custom theme should
+  instead add this package to their theme's `@source` list, per Filament's
+  [plugin Tailwind guidance](https://filamentphp.com/docs/5.x/advanced/assets#using-tailwind-css-in-plugins).
+  See the "Styles" section of the README.
+
 ## 4.5.0 - 2026-07-01
 
 ### Added

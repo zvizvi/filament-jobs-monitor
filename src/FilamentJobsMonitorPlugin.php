@@ -5,6 +5,7 @@ namespace Croustibat\FilamentJobsMonitor;
 use Closure;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use Filament\Support\Assets\Css;
 use Filament\Support\Concerns\EvaluatesClosures;
 use UnitEnum;
 
@@ -68,6 +69,11 @@ class FilamentJobsMonitorPlugin implements Plugin
     protected ?string $resource = null;
 
     /**
+     * Whether the bundled stylesheet should be loaded for the panel.
+     */
+    protected bool|Closure $styles = false;
+
+    /**
      * Get the plugin identifier.
      */
     public function getId(): string
@@ -83,6 +89,39 @@ class FilamentJobsMonitorPlugin implements Plugin
         $panel->resources([
             $this->getResource(),
         ]);
+
+        if ($this->shouldLoadStyles()) {
+            $panel->assets([
+                Css::make('filament-jobs-monitor-styles', __DIR__.'/../resources/dist/filament-jobs-monitor.css'),
+            ], 'croustibat/filament-jobs-monitor');
+        }
+    }
+
+    /**
+     * Determine whether the bundled stylesheet should be loaded.
+     */
+    public function shouldLoadStyles(): bool
+    {
+        return $this->evaluate($this->styles) === true;
+    }
+
+    /**
+     * Load the bundled stylesheet into the panel this plugin is registered on.
+     *
+     * Only needed when the panel uses Filament's default stylesheet. If the panel has
+     * a custom theme, prefer compiling this package's views into it instead:
+     *
+     *     @source '../../vendor/croustibat/filament-jobs-monitor/resources/views/**\/*.blade.php';
+     *     @source '../../vendor/croustibat/filament-jobs-monitor/src/**\/*.php';
+     *
+     * That way the utilities are built with your own design tokens rather than the
+     * bundle's hard-coded ones, which would otherwise override them.
+     */
+    public function withStyles(bool|Closure $condition = true): static
+    {
+        $this->styles = $condition;
+
+        return $this;
     }
 
     /**

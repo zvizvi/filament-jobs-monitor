@@ -3,8 +3,6 @@
 namespace Croustibat\FilamentJobsMonitor;
 
 use Croustibat\FilamentJobsMonitor\Commands\PruneQueueMonitorCommand;
-use Filament\Support\Assets\Css;
-use Filament\Support\Facades\FilamentAsset;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
@@ -30,10 +28,25 @@ class FilamentJobsMonitorServiceProvider extends PackageServiceProvider
         $this->app->singleton(FilamentJobsMonitorPlugin::class);
     }
 
+    /**
+     * The bundled stylesheet is deliberately NOT registered here.
+     *
+     * `FilamentAsset::register()` is global: an asset registered in `packageBooted()`
+     * is injected into every page of every panel, even panels that never register
+     * this plugin, and it renders after the panel theme. Because the bundle is a
+     * plain Tailwind utility dump, its single-class selectors then win the cascade
+     * and redefine the host application's `ring-*`, `gray-*` and `primary-*`
+     * utilities app-wide.
+     *
+     * Filament's own guidance is that plugins should let the host application's
+     * theme compile their views via `@source`, and that assets which load on every
+     * page belong on the panel instead. Both routes are supported here — see
+     * `FilamentJobsMonitorPlugin::withStyles()` and the README.
+     *
+     * @see https://filamentphp.com/docs/5.x/advanced/assets#using-tailwind-css-in-plugins
+     */
     public function packageBooted(): void
     {
-        FilamentAsset::register([
-            Css::make('filament-jobs-monitor-styles', __DIR__.'/../resources/dist/filament-jobs-monitor.css'),
-        ], 'croustibat/filament-jobs-monitor');
+        //
     }
 }
